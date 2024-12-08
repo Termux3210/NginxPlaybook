@@ -26,8 +26,8 @@
 
 1. **Клонируйте репозиторий**:
    ```bash
-   git clone <URL вашего репозитория>
-   cd <имя_репозитория>
+   git clone <https://github.com/Termux3210/NginxPlaybook>
+   cd <NginxPlaybook>
    ```
 
 2. **Настройка инвентарного файла**:
