@@ -1,120 +1,163 @@
-```markdown
-# Ansible Server Automation and Docker Deployment
+# "Docker Playbook"
 
 ## Описание проекта
 
-Данный репозиторий содержит Ansible-плейбуки и Dockerfile для автоматизации серверных задач, включая установку Docker, настройку Nginx, базовую настройку серверов, управление файлами и создание контейнера Ubuntu с SSH. Это решение подходит для быстрой настройки окружения, автоматизации задач DevOps и управления инфраструктурой.
+Проект "Docker Playbook" представляет собой набор Ansible playbook'ов и Dockerfile, предназначенных для автоматизации установки и настройки Docker, Nginx и других необходимых пакетов на серверах Ubuntu. Этот проект упрощает процесс развертывания и управления серверной инфраструктурой.
 
----
+## Структура проекта
 
-## Структура репозитория
+Проект состоит из следующих файлов:
 
-```
-.
-├── docker-playbook.yaml     # Плейбук для установки Docker
-├── playbook.yaml            # Плейбук для настройки сервера (Nginx, пакеты, пользователь)
-├── playbook2.yaml           # Плейбук для работы с файлами
-├── role_playbook.yaml       # Плейбук для установки Nginx через роль
-├── roles/
-│   └── nginx/               # Роль для установки Nginx
-├── Dockerfile               # Dockerfile для создания контейнера Ubuntu с SSH
-```
-
----
+- **docker-playbook.yaml**: Playbook для установки Docker на сервере Ubuntu.
+- **playbook.yaml**: Основной playbook для начальной настройки сервера, включая установку Nginx и других пакетов.
+- **playbook2.yaml**: Playbook для манипуляции файлами, включая копирование файлов и создание директорий.
+- **role_playbook**: Playbook для установки Nginx с использованием ролей Ansible.
+- **Dockerfile**: Файл, используемый для создания образа Docker с предустановленным SSH-сервером.
 
 ## Установка и использование
 
-### 1. Настройка Ansible
+### Требования
 
-Убедитесь, что на управляющей машине установлен Ansible. Целевые серверы должны быть доступны через SSH. Вы можете запускать плейбуки, указывая IP-адрес сервера в команде.
+Перед началом убедитесь, что у вас установлены следующие компоненты:
 
-Пример команды:
-```bash
-ansible-playbook -i "192.168.1.100," -u your_user --private-key your_key.pem <playbook>.yaml
-```
+- [Ansible](https://www.ansible.com/)
+- [Docker](https://www.docker.com/)
+- Сервер на базе Ubuntu
 
-### 2. Плейбуки
+### Шаги по установке
 
-#### Установка Docker
-Для установки Docker на сервер:
-```bash
-ansible-playbook -i "192.168.1.100," -u your_user --private-key your_key.pem docker-playbook.yaml
-```
-
-#### Настройка сервера (Nginx и пакеты)
-Для базовой настройки сервера:
-```bash
-ansible-playbook -i "192.168.1.100," -u your_user --private-key your_key.pem playbook.yaml
-```
-
-#### Работа с файлами
-Для копирования файлов и создания директорий:
-```bash
-ansible-playbook -i "192.168.1.100," -u your_user --private-key your_key.pem playbook2.yaml
-```
-
-#### Установка Nginx через роль
-Для установки и настройки Nginx с использованием роли:
-```bash
-ansible-playbook -i "192.168.1.100," -u your_user --private-key your_key.pem role_playbook.yaml
-```
-
-### 3. Dockerfile
-Для создания контейнера Ubuntu с поддержкой SSH:
-1. Постройте образ Docker:
+1. **Клонируйте репозиторий**:
    ```bash
-   docker build -t ubuntu-ssh .
-   ```
-2. Запустите контейнер:
-   ```bash
-   docker run -d -p 2222:22 ubuntu-ssh
-   ```
-3. Подключитесь к контейнеру через SSH:
-   ```bash
-   ssh root@localhost -p 2222
-   # Пароль: admin
+   git clone <URL вашего репозитория>
+   cd <имя_репозитория>
    ```
 
----
+2. **Настройка инвентарного файла**:
+   Убедитесь, что у вас есть файл инвентаризации Ansible, который содержит адреса ваших целевых серверов. Например:
+   ```ini
+   [ubuntu]
+   ваш_сервер_ip
+   ```
 
-## Содержание файлов
+3. **Запуск playbook для установки Docker**:
+   Выполните следующий команду для установки Docker:
+   ```bash
+   ansible-playbook -i inventory docker-playbook.yaml
+   ```
 
-### `docker-playbook.yaml`
-Плейбук для установки Docker CE:
-- Установка необходимых пакетов.
-- Добавление ключей GPG и репозитория Docker.
-- Установка Docker CE.
+4. **Запуск основного playbook для начальной настройки сервера**:
+   Выполните следующий команду для настройки сервера:
+   ```bash
+   ansible-playbook -i inventory playbook.yaml
+   ```
 
-### `playbook.yaml`
-Базовая настройка сервера:
-- Установка Nginx и дополнительных пакетов.
-- Настройка сетевого интерфейса.
-- Создание пользователя `test-user`, если Nginx запущен.
+5. **Запуск playbook для манипуляции файлами**:
+   Для выполнения операций с файлами используйте:
+   ```bash
+   ansible-playbook -i inventory playbook2.yaml
+   ```
 
-### `playbook2.yaml`
-Работа с файлами:
-- Копирование файлов на сервер.
-- Создание директорий.
-- Перемещение файлов в созданные директории.
+6. **Запуск role_playbook для установки Nginx**:
+   Чтобы установить Nginx с использованием ролей, выполните:
+   ```bash
+   ansible-playbook -i inventory role_playbook.yaml
+   ```
 
-### `role_playbook.yaml`
-Использование роли `nginx`:
-- Установка и настройка Nginx.
+### Создание образа Docker
 
-### `roles/nginx/`
-Роль для установки Nginx:
-- Устанавливает и запускает Nginx.
-- Гибко настраивается через переменные.
+Чтобы создать образ Docker с предустановленным SSH-сервером, выполните следующие шаги:
 
-### `Dockerfile`
-Dockerfile для создания контейнера:
-- Базовый образ Ubuntu.
-- Установка и настройка SSH.
-- Позволяет подключаться к контейнеру через `root` с паролем `admin`.
+1. Перейдите в директорию с вашим `Dockerfile`.
+2. Выполните команду сборки образа:
+   ```bash
+   docker build -t my-ssh-server .
+   ```
 
----
+3. Запустите контейнер на основе созданного образа:
+   ```bash
+   docker run -d -p 2222:22 my-ssh-server
+   ```
+
+Теперь вы можете подключиться к вашему SSH-серверу на порту 2222.
+
+## Описание файлов
+
+### docker-playbook.yaml
+
+Этот playbook устанавливает Docker и его зависимости на сервере Ubuntu:
+
+```yaml
+- name: Install Docker
+  hosts: ubuntu
+  become: yes
+  tasks:
+    - name: Install Packages
+      apt:
+        name: "{{item}}"
+        state: present
+      with_items:
+        - curl
+        - apt-transport-https
+        - ca-certificates
+        - software-properties-common
+    - name: Add keys
+      shell:
+        cmd: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    - name: Add repo
+      shell:
+        cmd: add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+```
+
+### playbook.yaml
+
+Этот playbook выполняет начальную настройку сервера:
+
+```yaml
+- name: Initial server setup
+  hosts: ubuntu
+  gather_facts: no
+  tasks:
+    ...
+```
+
+### playbook2.yaml
+
+Playbook для манипуляции файлами:
+
+```yaml
+- name: File manipulation
+  hosts: ubuntu
+  tasks:
+    ...
+```
+
+### role_playbook
+
+Playbook для установки Nginx с использованием ролей Ansible:
+
+```yaml
+- name: Nginx installation
+  become: yes 
+  hosts: ubuntu
+  roles:
+    - nginx
+```
+
+### Dockerfile
+
+Файл для создания образа Docker с SSH-сервером:
+
+```dockerfile
+FROM ubuntu:latest
+RUN apt-get update && apt-get install -y openssh-server 
+...
+CMD ["/usr/sbin/sshd", "-D"]
+```
 
 ## Заключение
 
-Этот репозиторий предоставляет инструменты для автоматизации задач серверной настройки и развёртывания приложений. Использование Ansible и Docker облегчает управление инфраструктурой, позволяя быстро настраивать серверы и контейнеры для ваших приложений.
-```
+Проект "Docker Playbook" предоставляет удобные инструменты для автоматизации установки и настройки серверов Ubuntu с использованием Ansible и Docker. Если у вас есть вопросы или предложения по улучшению проекта, пожалуйста, свяжитесь с нами!
